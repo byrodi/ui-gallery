@@ -1,0 +1,10 @@
+{
+  "name": "ui-gallery",
+  "description": "Agent skill that shows every state of an app's UI on one page as live iframes of the real code over a fake backend.",
+  "author": {
+    "name": "Rodion Masalov",
+    "url": "https://github.com/byrodi"
+  },
+  "repository": "https://github.com/byrodi/ui-gallery",
+  "license": "MIT"
+}
