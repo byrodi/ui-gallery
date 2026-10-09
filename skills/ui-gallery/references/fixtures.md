@@ -112,4 +112,10 @@ the scenario, and records what the app sends. Real-time screens often need a "co
 
 Look before writing new data: `__fixtures__`, `test/fixtures`, factories (`fishery`, `@faker-js` with
 a fixed seed), Storybook `args`, Playwright or Cypress mocks, seed scripts, OpenAPI examples. Import
-them from the harness through the alias rather than copying them.
+them from the harness through the alias rather than copying them. When such a file imports a test
+runner (`vitest`, `@jest/globals`) for `vi.fn()` or similar, add a harness alias that points that
+import at a tiny shim exporting what the fixtures use.
+
+Validators decide the format, not intuition: if the app checks that an avatar is a PNG data URL or
+that an ID has 16 hex digits, the fixture must satisfy that check, or the frame shows the app's
+error screen instead of the state you meant.

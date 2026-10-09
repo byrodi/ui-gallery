@@ -17,7 +17,7 @@ code, then keep the ones that matter for this review.
   text if supported, large numbers.
 - Viewports: the phone, tablet and desktop widths the CSS actually distinguishes.
 
-## A good default set (8 to 16 frames)
+## What every gallery should contain
 
 1. The main screen in its normal, populated state.
 2. The same screen empty.
@@ -30,7 +30,9 @@ code, then keep the ones that matter for this review.
 9. First run or onboarding, if the product has one.
 10. Any state the person asked about or the latest change touched.
 
-Group frames by screen or by topic, and order groups the way a user meets them.
+Then go through every screen and add its remaining distinct states. Skip a state only when its frame
+would look the same as another one. Group frames by screen or by topic, and order groups the way a
+user meets them.
 
 ## Captions
 

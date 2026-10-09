@@ -1,13 +1,15 @@
 // Paste this function into evaluate_script (chrome-devtools) on the open gallery page.
-// It needs the gallery and the frames on one origin. It scrolls once so lazy frames load,
-// waits for them, and returns one row per frame plus a list of problems.
+// It needs the gallery and the frames on one origin. It scrolls through the page one screen at a
+// time so lazy frames load, waits for them, and returns one row per frame plus a list of problems.
 async () => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  window.scrollTo(0, document.body.scrollHeight);
-  await sleep(300);
+  for (let y = 0; y < document.body.scrollHeight; y += innerHeight * 0.8) {
+    window.scrollTo(0, y);
+    await sleep(400);
+  }
   window.scrollTo(0, 0);
   const frames = [...document.querySelectorAll('iframe')];
-  const deadline = Date.now() + 8000;
+  const deadline = Date.now() + 15000;
   const read = (f) => {
     let doc;
     try {

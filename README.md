@@ -12,12 +12,13 @@ Storybook idea applied to whole screens, without adding a framework to the proje
 
 1. The agent reads the app: stack, entry point, where the UI gets its data, the real viewport size,
    existing stories, mocks and fixtures.
-2. It lists the states from the code (empty, loading, error, offline, modes, dialogs, first run,
-   long content) and picks 8 to 16 of them.
+2. It lists every distinct state from the code (empty, loading, error, offline, modes, dialogs,
+   first run, long content) and groups them.
 3. It builds a harness outside the repository that imports the app's real code after a fake
    transport (fetch, MSW, axios, GraphQL, Tauri `invoke`, an Electron preload bridge).
 4. A URL parameter picks the scenario; optional steps click through to dialogs and sheets.
-5. `scripts/make_gallery.py` writes `gallery.html`, a grid of captioned frames at the app's real size.
+5. `scripts/make_gallery.py` writes `gallery.html`: captioned frames at the app's real size, grouped,
+   with jump links, a zoom control and a status badge on every frame.
 6. The agent checks that every frame rendered and opens the page in your browser.
 
 The project's own files stay untouched unless you ask to keep the gallery.
@@ -51,6 +52,7 @@ only Python 3.
 | `skills/ui-gallery/SKILL.md` | The workflow the agent follows |
 | `skills/ui-gallery/references/` | Harness per stack, fake backends per transport, how to choose scenarios |
 | `skills/ui-gallery/assets/harness/` | Vite harness template: `index.html`, `boot.ts`, `fake-backend.ts`, `steps.ts`, `vite.config.mjs` |
+| `skills/ui-gallery/assets/serve.sh` | Rebuilds the harness, writes the page and starts or stops the preview by its PID file |
 | `skills/ui-gallery/scripts/make_gallery.py` | Writes the gallery page from a scenario list |
 | `skills/ui-gallery/scripts/check_frames.js` | Browser check that every frame rendered |
 

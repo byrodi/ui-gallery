@@ -1,10 +1,13 @@
 /*
- * Scripted steps for a gallery frame: ?do=click:Settings,fill:Email=ann@example.com,wait:300
- * runs them in order after the first render. Steps match visible text, accessible names and roles,
- * never CSS classes, so they survive a restyle. Adapt the "ready" selector below to the app.
+ * Scripted steps for a gallery frame: ?do=click:Settings|fill:Email=ann@example.com|wait:300
+ * (or one step per repeated do= parameter) runs them in order after the first render. Steps are
+ * separated by "|" because visible texts often contain commas. Steps match visible text, accessible
+ * names and roles, never CSS classes, so they survive a restyle. Adapt the "ready" selector below to
+ * something that appears only after the app's data has loaded.
  *
- *   click:<text>          click the first enabled button, link, tab, switch, menu item or summary
- *                         whose visible text or aria-label equals <text> (inside an open dialog first)
+ *   click:<text>          click the first enabled button, link, tab, switch, menu item, summary,
+ *                         radio or checkbox whose visible text, aria-label or label equals <text>
+ *                         (inside an open dialog first)
  *   clickstart:<text>     the same, matching the start of the text (rows with extra text)
  *   fill:<label>=<value>  type into the field whose label, aria-label or placeholder is <label>
  *   key:<key>             press a key on the focused element (Escape, Enter, ArrowDown)
@@ -14,7 +17,7 @@
  */
 export {};
 
-const steps = (new URLSearchParams(location.search).get('do') ?? '').split(',').filter(Boolean);
+const steps = new URLSearchParams(location.search).getAll('do').flatMap((v) => v.split('|')).filter(Boolean);
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 async function find<T>(pick: () => T | null | undefined, ms = 4000): Promise<T> {
@@ -28,9 +31,16 @@ async function find<T>(pick: () => T | null | undefined, ms = 4000): Promise<T> 
 }
 
 const scope = (): ParentNode => document.querySelector('dialog[open], [role=dialog]') ?? document;
-const accessibleName = (el: Element): string => (el.getAttribute('aria-label') ?? el.textContent ?? '').replace(/\s+/g, ' ').trim();
+const squash = (t: string | null | undefined): string => (t ?? '').replace(/\s+/g, ' ').trim();
+// A native radio or checkbox takes its name from its <label>, like a screen reader does.
+const accessibleName = (el: Element): string => {
+  const aria = el.getAttribute('aria-label');
+  if (aria) return squash(aria);
+  if (el instanceof HTMLInputElement && el.labels?.length) return squash(el.labels[0].textContent);
+  return squash(el.textContent);
+};
 const clickables = (): HTMLElement[] =>
-  [...scope().querySelectorAll<HTMLElement>('button, a[href], [role=button], [role=tab], [role=switch], [role=menuitem], [role=radio], summary')]
+  [...scope().querySelectorAll<HTMLElement>('button, a[href], [role=button], [role=tab], [role=switch], [role=menuitem], [role=radio], [role=checkbox], summary, input[type=radio], input[type=checkbox]')]
     .filter((el) => !(el as HTMLButtonElement).disabled && el.getAttribute('aria-disabled') !== 'true');
 
 function field(label: string): HTMLInputElement | HTMLTextAreaElement | null {

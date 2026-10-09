@@ -52,11 +52,12 @@ List the states from the code itself: status enums, union types, error branches,
 loading flags, dialogs, sheets and menus, modes and toggles, roles and permissions, first run, long
 or translated text. [references/scenarios.md](references/scenarios.md) has a checklist.
 
-Pick 8 to 16 scenarios that answer what the person wants to judge, grouped by screen or by topic.
-Always include the main happy path, an empty state, an error or offline state, and the longest
-realistic content. More than about 20 frames makes the page slow and the review shallow; split into
-several galleries instead. If the main task of the app is unclear, ask one question; otherwise decide
-and say what you chose.
+Cover every distinct state the person would want to judge, not a sample: people use the gallery to
+see all scenarios at once. A small app has about 10 to 20 states, a larger one 30 to 60. Group them
+by screen or by topic in the order a user meets them. Always include the main happy path, an empty
+state, an error or offline state, and the longest realistic content. Leave out states that look the
+same as another frame, and say which areas you left out. If the main task of the app is unclear, ask
+one question; otherwise decide and say what you chose.
 
 ### 3. Build the harness without touching the app
 
@@ -66,7 +67,8 @@ and adds nothing to it. Build it in the repository only when the person wants th
 use a clearly named directory (for example `fixtures/` or `app/gallery/`), a script or make target
 to start it, and gitignored build output.
 
-Start from `assets/harness/`: `index.html`, `boot.ts`, `steps.ts` and a `vite.config.mjs` template.
+Start from `assets/harness/`: `index.html`, `boot.ts`, `fake-backend.ts`, `steps.ts` and a
+`vite.config.mjs` template, plus `assets/serve.sh`.
 `boot.ts` installs the fake transport first, then imports the real entry, then the step runner. Copy
 the app's own bundler settings that matter (framework plugin, path aliases from `tsconfig`, `define`
 and env variables, CSS preprocessors) instead of inventing new ones.
@@ -92,10 +94,13 @@ covers fetch, MSW, axios, GraphQL, Tauri, Electron and websockets.
 
 ### 5. Reach interactive states with steps
 
-For a dialog, a sheet, a filled form or a scrolled list, add `?do=step,step` and run the steps from
-`steps.ts` after the first render. Match visible text, accessible names and roles, never CSS class
-names, so the steps survive a restyle. The runner sets `document.body.dataset.steps` to `done` or
-`failed: <step>`, which the check in step 7 reads.
+For a dialog, a sheet, a filled form or a scrolled list, add `?do=step|step` (or repeat `do=`) and
+run the steps from `steps.ts` after the first render. Steps are separated by `|`, because visible
+texts often contain commas. Match visible text, accessible names and roles, never CSS class names, so
+the steps survive a restyle. Set the runner's "ready" selector to something that appears only after
+the data has loaded; a loading screen that already has `<main>` would start the steps too early. The
+runner sets `document.body.dataset.steps` to `done` or `failed: <step>`, which the check in step 7
+reads.
 
 ### 6. Build, serve and generate the page
 
@@ -105,31 +110,43 @@ inject overlays, and that can show states the real app never shows. Use the dev 
 iterating on fixtures.
 
 Write the scenario list as JSON and generate the page into the served root, so the gallery and the
-frames share one origin (the check in step 7 needs that):
+frames share one origin (the check in step 7 and the page's own status badges need that):
 
 ```sh
 python3 scripts/make_gallery.py scenarios.json --out <served-root>/gallery.html
 ```
 
+Copy `make_gallery.py`, `scenarios.json` and `assets/serve.sh` into the harness, so the gallery can
+be rebuilt and restarted without this skill. `serve.sh` builds, writes the page, starts the preview
+in the background with a PID file and prints the URL; `serve.sh stop` stops exactly that process.
+
 The JSON format is in the docstring of `scripts/make_gallery.py`. Write the title, the lead and the
 captions in the reviewer's language, and keep the UI itself in its own language. Say in the lead
 that the data is made up and that every frame is clickable. Set the frame size to the app's real
-viewport; wide frames are scaled down automatically and keep an "open" link to full size.
+viewport; wide frames are scaled down automatically and keep an "open" link to full size. The page
+has jump links to every group, a zoom control, a status badge on each frame (rendered, steps failed,
+blank) and lazy loading once it holds more than 16 frames.
 
 ### 7. Check every frame
 
 Before showing the page, open it in a browser you control (with the chrome-devtools skill if it is
 available) and run `scripts/check_frames.js` through `evaluate_script`. It lists every frame with
 its rendered text, the step status and any blank or failed frame. Fix blank frames, failed steps and
-console errors, then check again. Take a screenshot of the gallery if the person cannot open a
-browser.
+console errors, then check again. Also read a few frames' text yourself to confirm each shows the
+state its caption promises, not just something. Take a screenshot of the gallery if the person
+cannot open a browser; the chrome-devtools server saves files only inside its workspace root, so
+save there and move the file.
 
 ### 8. Hand it over
 
 Open the page in the person's default browser (`open` on macOS, `xdg-open` on Linux, `start` on
-Windows), give the URL, list the scenarios in a few words, and say that the server keeps running in
-the background and how to stop it. Mention anything you knowingly left out. Offer to keep the
-gallery in the repository if it lives in a temporary directory.
+Windows), give the URL, list the groups in a few words, and say that the server keeps running in
+the background and how to stop it (`serve.sh stop`). Mention anything you knowingly left out. Offer
+to keep the gallery in the repository if it lives in a temporary directory.
+
+Stop servers only by their PID or port (`kill $(cat <pidfile>)`, `lsof -t -iTCP:<port> -sTCP:LISTEN`).
+Never use `pkill -f` on a command line: other galleries and other sessions run the same
+`vite preview` command, and a pattern match kills theirs too.
 
 ## Pitfalls
 
@@ -145,7 +162,10 @@ gallery in the repository if it lives in a temporary directory.
 - **Frame-blocking headers.** `X-Frame-Options` or a CSP `frame-ancestors` rule from the app's server
   blocks iframes. The harness serves its own build, so do not copy those headers into it.
 - **Service workers and caches.** Disable registration in the harness, or frames show stale builds.
-- **Too many frames.** Each frame boots the whole app. Past about 20, split the gallery.
+- **Many frames.** Each frame boots the whole app. Use the production build, keep lazy loading on for
+  large pages, and prefer one well-grouped page over several small ones.
+- **Test-only imports in fixtures.** Reusing the app's test fixtures is good, but a fixture file that
+  imports `vitest` or `jest` fails in the browser; alias that import to a small shim.
 
 ## Done when
 
