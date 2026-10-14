@@ -109,8 +109,10 @@ equivalent) on a fixed free port. Development servers often run effects twice (R
 inject overlays, and that can show states the real app never shows. Use the dev server only while
 iterating on fixtures.
 
-Write the scenario list as JSON and generate the page into the served root, so the gallery and the
-frames share one origin (the check in step 7 and the page's own status badges need that):
+Copy `assets/scenarios.template.json` to `scenarios.json` and fill it with the states found in the
+app. Keep the generated shell: change the JSON, not the gallery's HTML or CSS. Generate the page
+into the served root, so the gallery and the frames share one origin (the check in step 7 and the
+page's own status badges need that):
 
 ```sh
 python3 scripts/make_gallery.py scenarios.json --out <served-root>/gallery.html
@@ -120,12 +122,35 @@ Copy `make_gallery.py`, `scenarios.json` and `assets/serve.sh` into the harness,
 be rebuilt and restarted without this skill. `serve.sh` builds, writes the page, starts the preview
 in the background with a PID file and prints the URL; `serve.sh stop` stops exactly that process.
 
-The JSON format is in the docstring of `scripts/make_gallery.py`. Write the title, the lead and the
-captions in the reviewer's language, and keep the UI itself in its own language. Say in the lead
-that the data is made up and that every frame is clickable. Set the frame size to the app's real
-viewport; wide frames are scaled down automatically and keep an "open" link to full size. The page
-has jump links to every group, a zoom control, a status badge on each frame (rendered, steps failed,
-blank) and lazy loading once it holds more than 16 frames.
+Write the title, lead and captions in the reviewer's language; keep the app UI in its own language.
+The lead says that the data is made up and every frame is clickable. `lang` localizes the shell
+in English or Russian (`en` or `ru`).
+
+Fill these fields rather than inventing a new layout:
+
+| Field | What to write |
+| --- | --- |
+| `groups[].title` | A short screen or journey name, without a number or a frame count |
+| `groups[].description` | One sentence explaining what this group covers and who uses it |
+| `scenarios[].title` | The specific state, such as "Empty schedule" or "Request failed" |
+| `scenarios[].note` | What caused the state and what the reviewer should check |
+| `scenarios[].url` | The actual harness URL that reproduces this state |
+| `frame.width`, `frame.height` | The app's real viewport; individual scenarios can override both |
+
+The template URLs are examples, not implemented fixtures. Replace them with URLs supported by
+your fake backend. Group descriptions and scenario notes are optional for older scenario lists,
+but include them in new galleries. A flat `scenarios` list still works.
+
+The shell uses a light pink-plum theme, a numbered contents panel, section descriptions and
+consistent preview cards. Numbers are generated automatically: `01` for a group, `1.1` for its
+first state. Counts have their own labels. Long titles wrap instead of disappearing. Do not add
+numbers to titles or put a prose list above the generated contents.
+
+Frames keep the app's real viewport and fit the available space automatically, including on narrow
+screens. `max_width` limits preview width (default 480 CSS pixels); "Open separately" opens the
+original URL. There are no zoom buttons or saved scale settings. Cards have reload actions and
+text status badges (ready, steps failed, blank). Frames load lazily above 16 states; `lazy` can
+override that default. The shell changes no styles inside the app's iframes.
 
 ### 7. Check every frame
 
@@ -173,5 +198,8 @@ Never use `pkill -f` on a command line: other galleries and other sessions run t
   status is `done` where steps are used.
 - The real front-end code runs unchanged; the repository has no new or modified files unless the
   person asked to keep the gallery.
-- Captions name each state in the reviewer's language, and the page says the data is fake.
+- The numbered contents, section descriptions and captions explain each group's purpose and each
+  frame's state in the reviewer's language. The page says the data is fake.
+- The generated shell is reused without manual numbering or zoom controls. Long titles wrap,
+  keyboard focus is visible, and the outer page has no horizontal overflow on narrow screens.
 - The page is open in the person's browser and they have the URL and the way to stop the server.

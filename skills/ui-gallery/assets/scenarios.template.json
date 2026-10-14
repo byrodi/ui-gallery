@@ -1,0 +1,27 @@
+{
+  "title": "Product: interface review",
+  "lead": "Real interface with made-up data. Click inside any frame to try it.",
+  "lang": "en",
+  "frame": {"width": 390, "height": 844},
+  "max_width": 480,
+  "groups": [
+    {
+      "title": "First visit",
+      "description": "How a new user sets up their profile and finds the next step.",
+      "scenarios": [
+        {"title": "Welcome", "note": "No profile yet. Check whether the first action is clear.", "url": "/?state=first-run"},
+        {"title": "Profile ready", "note": "Setup is complete. The user can start working.", "url": "/?state=ready"}
+      ]
+    },
+    {
+      "title": "Daily work",
+      "description": "The main screen with data, without data and when a request fails.",
+      "scenarios": [
+        {"title": "Normal", "note": "A few realistic items and the main action.", "url": "/?state=normal"},
+        {"title": "Empty", "note": "No items yet. Check the explanation and next step.", "url": "/?items=none"},
+        {"title": "Offline", "note": "The request failed. Check the message and retry action.", "url": "/?fail=offline"},
+        {"title": "Long content", "note": "Long names and enough items to scroll.", "url": "/?items=long"}
+      ]
+    }
+  ]
+}

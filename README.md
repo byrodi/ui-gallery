@@ -17,8 +17,9 @@ Storybook idea applied to whole screens, without adding a framework to the proje
 3. It builds a harness outside the repository that imports the app's real code after a fake
    transport (fetch, MSW, axios, GraphQL, Tauri `invoke`, an Electron preload bridge).
 4. A URL parameter picks the scenario; optional steps click through to dialogs and sheets.
-5. `scripts/make_gallery.py` writes `gallery.html`: captioned frames at the app's real size, grouped,
-   with jump links, a zoom control and a status badge on every frame.
+5. The agent fills `assets/scenarios.template.json`, then `scripts/make_gallery.py` writes
+   `gallery.html`: a numbered contents panel with group descriptions and preview cards with state
+   notes, open/reload actions and status badges. Frames fit automatically; there are no zoom controls.
 6. The agent checks that every frame rendered and opens the page in your browser.
 
 The project's own files stay untouched unless you ask to keep the gallery.
@@ -53,6 +54,7 @@ only Python 3.
 | `skills/ui-gallery/references/` | Harness per stack, fake backends per transport, how to choose scenarios |
 | `skills/ui-gallery/assets/harness/` | Vite harness template: `index.html`, `boot.ts`, `fake-backend.ts`, `steps.ts`, `vite.config.mjs` |
 | `skills/ui-gallery/assets/serve.sh` | Rebuilds the harness, writes the page and starts or stops the preview by its PID file |
+| `skills/ui-gallery/assets/scenarios.template.json` | Ready scenario list to copy and fill; the generator supplies the layout and numbering |
 | `skills/ui-gallery/scripts/make_gallery.py` | Writes the gallery page from a scenario list |
 | `skills/ui-gallery/scripts/check_frames.js` | Browser check that every frame rendered |
 
