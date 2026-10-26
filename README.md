@@ -1,7 +1,8 @@
 # ui-gallery
 
-An agent skill that shows every state of an app's interface on one page: live, clickable iframes of
-the real front-end code, each fed by a fake backend in its own scenario, side by side.
+Agent skill that shows every state of an app's UI on one page as live iframes of the real code over a fake backend.
+
+Each frame is the real front-end code, clickable, fed by a fake backend in its own scenario.
 
 It suits a design review, a check after a redesign, or a question like "what does this screen look
 like when it is empty, offline or full of long names?". It works for web UIs (React, Vue, Svelte,
@@ -36,15 +37,22 @@ Claude Code:
 
 ## Install
 
-Clone the repository and link the plugin directory into your skills folder:
+Claude Code (remove or rename an existing `~/.claude/skills/ui-gallery` first):
 
 ```sh
-git clone https://github.com/byrodi/ui-gallery.git
-ln -s "$PWD/ui-gallery" ~/.claude/skills/ui-gallery
+git clone https://github.com/byrodi/ui-gallery ~/IdeaProjects/skills/ui-gallery
+ln -s ~/IdeaProjects/skills/ui-gallery ~/.claude/skills/ui-gallery
 ```
 
-The browser check uses a chrome-devtools MCP server when one is available. The gallery script needs
-only Python 3.
+Or through the [byrodi marketplace](https://github.com/byrodi/skills): `claude plugin marketplace add byrodi/skills`, then `claude plugin install ui-gallery@byrodi`.
+
+Codex:
+
+```sh
+ln -s ~/IdeaProjects/skills/ui-gallery/skills/ui-gallery ~/.agents/skills/ui-gallery
+```
+
+Update with `git pull` in the clone. The browser check uses a chrome-devtools MCP server when one is available. The gallery script needs only Python 3.
 
 ## Contents
 

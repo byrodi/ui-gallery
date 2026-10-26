@@ -1,0 +1,42 @@
+name: Bug report
+description: The skill, the gallery generator or a harness template does not work as documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search [existing issues](https://github.com/byrodi/ui-gallery/issues?q=is%3Aissue) first. Security problems go to a [private report](https://github.com/byrodi/ui-gallery/security/advisories/new), not here.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you asked for, what you expected and what the skill or the gallery did instead.
+    validations:
+      required: true
+  - type: input
+    id: stack
+    attributes:
+      label: App stack
+      description: Framework and bundler of the app you ran it on, for example React with Vite or Tauri 2.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Skill commit
+      description: Output of `git rev-parse --short HEAD` in your clone.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Agent
+      description: Claude Code or Codex with its version, and the model if you know it.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output
+      description: Output of `make_gallery.py`, `serve.sh` or `check_frames.js`, if relevant. It is formatted as code automatically.
+      render: shell
